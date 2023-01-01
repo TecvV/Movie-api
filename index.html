@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+     <meta charset="UTF-8">
+     <meta http-equiv="X-UA-Compatible" content="IE=edge">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Movie API</title>
+</head>
+<style>
+     .overlay {
+          height: 100%;
+          width: 0;
+          position: fixed;
+          z-index: 1;
+          top: 0;
+          left: 0;
+          background-color: rgb(0, 0, 0);
+          background-color: rgba(0, 0, 0, 0.9);
+          overflow-x: hidden;
+          transition: 0.5s;
+     }
+
+     .overlay a {
+          padding: 8px;
+          text-decoration: none;
+          font-size: 36px;
+          color: #818181;
+          display: block;
+          transition: 0.3s;
+     }
+
+     .overlay a:hover,
+     .overlay a:focus {
+          color: #f1f1f1;
+     }
+
+     .overlay .closebtn {
+          position: absolute;
+          top: 2vw;
+          right: 5vw;
+          font-size: 6vw;
+     }
+     .overlay-content{
+          display: flex;
+          flex-wrap: wrap;
+     }
+
+     @media screen and (max-height: 450px) {
+          .overlay a {
+               font-size: 20px
+          }
+
+          .overlay .closebtn {
+               font-size: 40px;
+               top: 15px;
+               right: 35px;
+          }
+     }
+
+     #bdy {
+
+          /* background-image: url(''); */
+          z-index: -100;
+          /* background-color: rgb(129, 32, 220); */
+          /* background-image: url('data:image/jpeg;base64,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'); */
+          background-size: contain;
+          background: url('https://media.istockphoto.com/id/1295114854/photo/empty-red-armchairs-of-a-theater-ready-for-a-show.jpg?b=1&s=170667a&w=0&k=20&c=W__8iZMDp4XtPAMPRuTPPYzszc1A4fdajYGn0ox9kG4=');
+          background-attachment: fixed;
+          background-repeat: no-repeat;
+          background-size: cover;
+     }
+
+     .rating {
+          margin-top: 2vw;
+     }
+
+     #im {
+          width: 17vw;
+     }
+
+     .card {
+          background-color: rgb(37, 3, 3);
+          width: 18vw;
+          margin-left: 7vw;
+          margin-top: 3vw;
+          text-align: center;
+          border: solid #744949 1vw;
+          font-style: italic;
+          font-size: 2vw;
+          border-radius: 0.5vw;
+          color: #fbff00;
+     }
+
+     .overview {
+          margin-top: 2vw;
+          background-color: #fbff00;
+          width: 11vw;
+          height: 3vw;
+          border-radius: 4.2vw;
+          border: solid blue 0.35vw;
+          font-style: unset;
+          font-size: 1.2vw;
+          text-decoration: none;
+          font-style: oblique;
+     }
+
+     .overview:hover {
+          cursor: pointer;
+     }
+
+     .navbar {
+          height: 5vw;
+          background-color: rgb(10, 11, 9);
+          color: white;
+          margin-top: -0.6vw;
+          width: 98.6vw;
+          margin-left: -0.6vw;
+     }
+
+     h1 {
+          width: 15vw;
+          height: 0vw;
+          margin-top: 0vw;
+          margin-left: 1vw;
+          margin-bottom: 1.5vw;
+          font-size: 4vw;
+     }
+
+     #main {
+          /* background-color: red; */
+
+          height: 100%;
+          margin-top: 17vw;
+          width: 100%;
+          display: flex;
+          flex-wrap: wrap;
+
+          /* height: 44vw;
+    margin-top: 17vw;
+    width: 98vw;
+    display: flex;
+    flex-wrap: wrap; */
+     }
+
+     /* 2nd page */
+     .img2 {
+          width: 20vw;
+          height: 10vw;
+     }
+
+     .container {
+          background-color: #744949;
+          width: 100%;
+          height: 100%;
+     }
+
+     #findMovie {
+          float: right;
+          width: 9vw;
+          height: 2vw;
+          font-size: 1vw;
+          background-color: red;
+          color: white;
+          border-radius: 1vw;
+          border: solid;
+          cursor: pointer;
+     }
+
+     #search {
+          margin-left: 2vw;
+          float: right;
+          width: 15vw;
+          height: 2vw;
+          margin-right: 2vw;
+          font-size: 1vw;
+          border: solid red;
+          border-radius: 1vw;
+     }
+
+     #exp {
+          background-color: rgb(130, 4, 4);
+          height: 13vw;
+          width: 97.5vw;
+          display: flex;
+          top: 0.001vw;
+          position: sticky;
+     }
+
+     .name_ov {
+          width: 64vw;
+     }
+     .tag{
+          margin-left: 4vw;
+          border: solid 0.5vw red;
+          margin-top: 13vw;
+          border-radius: 1vw;
+          background-color: antiquewhite;
+          width: 12vw;
+          height: 3vw;
+          text-align: center;
+          padding-top: 1.3vw;
+          font-size: 0.9vw;
+          cursor: pointer;
+          font-style:italic;
+     }
+     .tag.highlight{
+          background-color: rgb(4, 220, 101);
+     }
+     
+     .NR{
+          font-size: 5vw;
+          color: red;
+          width: 5vw;
+          height: 5vw;
+     }
+     .hh{
+          font-size: 3vw;
+          margin-left: 34vw;
+          width: 27vw;
+     }
+     .footer{
+          background-color: rgb(0, 0, 0);
+          height: 17vw;
+          margin-top: 6vw;
+          margin-left: -0.6vw;
+          width: 98.6vw;
+          margin-bottom: -1vw;
+          color: white;
+          
+     }
+     .am{
+          margin-left: 16vw;
+          font-size: 2.5vw;
+     }
+     .free{
+          font-size: 2vw;
+          margin-left: 34vw;
+          margin-top: 3vw;
+          color: #a6a6ff;
+     }
+     .contact{
+          text-decoration: none;
+     }
+     .gg{
+          width: 4vw;
+          height: 4vw;
+          margin-left: 21vw;
+          margin-top: 3vw;
+          text-decoration: none;
+          border-radius: 2vw;
+     }
+</style>
+
+<body id="bdy">
+     <nav class="navbar">
+          <h1 class="h1">MovieNation</h1>
+          <!-- <form action="" id="form"> -->
+          <input type="search" name="" id="search" placeholder="Search any Movie">
+          <!-- </form> -->
+          <button id="findMovie" onclick="findd()">Find Movie</button>
+     </nav>
+     
+     <div class="overlay" id="myNav">
+          <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+          <div class="overlay-content" id="tags">
+                <!-- <a href="#">About</a>
+               <a href="#">Services</a>
+               <a href="#">Clients</a>
+               <a href="#">Contact</a> 
+               <div class="Action">Action</div>  -->
+               
+          </div>
+     </div>
+     <span style="font-size: 3vw;
+     color: red;
+     cursor: pointer;" onclick="openNav()">&#9776; View Different Genres</span>
+     <div id="main">
+          
+     </div>
+
+     <div class="footer">
+          <div class="am">
+               Created by Aryan Mishra using HTML,CSS and JAVASCRIPT
+          </div>
+          <div class="free">
+               Feel free to Contact Me anytime
+          </div>
+          <div class="contact">
+               <a href="https://github.com/TecvV" target="_blank"> <img src="https://glistening-basbousa-f0b806.netlify.app/footer_images/github.jpg" alt="" class="gg"> </a>
+               <a href="https://www.instagram.com/tecvaryan/" target="_blank"> <img src="https://glistening-basbousa-f0b806.netlify.app/footer_images/instaBlack.jpg" alt="" class="gg"> </a>
+               <a href="https://www.linkedin.com/in/aryan-mishra-52ba21205/" target="_blank"> <img src="https://glistening-basbousa-f0b806.netlify.app/footer_images/linked.png" alt="" class="gg"> </a>
+          </div>
+     </div>
+
+
+     
+     <script src="indeex.js"> </script>
+</body>
+
+</html>
+
+
+<!-- <div class="container">
+     <img src=${base_imgUrl + image} alt="" class="img2">
+     <div class="detail">
+          <h1>Overview</h1>
+          <p>${overView}</p>
+     </div>
+</div> -->
+
+<!-- <a href="second.html?n" target="_blank">View Details</a> -->
